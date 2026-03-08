@@ -75,7 +75,22 @@ def main():
     # apply a four-point perspective transform to the *original* image to
     # obtain a top-down bird's-eye view of the receipt
     receipt = four_point_transform(img_orig, receiptCnt.reshape(4, 2) * ratio)
-    # cv2.imwrite('transformed_receipt.jpg', receipt)
+    
+    # check if transformed area is too small compared to original image
+    # if so, use original image directly instead of the transform
+    transformed_area = receipt.shape[0] * receipt.shape[1]
+    original_area = img_orig.shape[0] * img_orig.shape[1]
+    area_threshold = 0.1  # if transformed area < 10% of original, fall back to original
+    
+    if transformed_area < (area_threshold * original_area):
+        print("[INFO] Transformed receipt area too small, using original image instead")
+        receipt = img_orig
+    
+    # output receipt reshaped as an image with name: original_image + '.tmp.<extension>'
+    # _, file_ext = os.path.splitext(args.image)
+    # output_path = f"{args.image}.tmp{file_ext}"
+    # cv2.imwrite(output_path, receipt)
+    # print(f"[INFO] Reshaped receipt saved to: {output_path}")
 
     # apply OCR to the receipt image by assuming column data, ensuring
     # the text is *concatenated across the row* (additionally, for your
